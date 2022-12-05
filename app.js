@@ -14,28 +14,52 @@ app.set("views", "views");
 
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
+const authRoutes = require("./routes/auth");
 
 const mongoose = require("mongoose");
+const session = require("express-session");
+const MongoDbStore = require("connect-mongodb-session")(session);
+
+const MONGODB_URI='mongodb://localhost:27017/'
+const store=new MongoDbStore({
+  uri:MONGODB_URI,
+  collection:'sessions'
+})
+
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
+app.use(
+  session({
+    secret: "my secret",
+    resave: false, 
+    saveUninitialized: false,
+    store: store,
+  })
+);
+
+
 app.use((req, res, next) => {
-  User.findById("637c3b627f9dae74579f1266")
-    .then((user) => {
+  if (!req.session.user) {
+    return next();
+  }
+  User.findById(req.session.user._id)
+    .then(user => {
       req.user = user;
       next();
     })
-    .catch((err) => console.log(err));
+    .catch(err => console.log(err));
 });
 
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
+app.use(authRoutes);
 
 app.use(errorController.get404);
 
 mongoose
-  .connect("mongodb://localhost:27017/")
+  .connect(MONGODB_URI)
   .then((result) => {
     User.findOne().then((user) => {
       if (!user) {
