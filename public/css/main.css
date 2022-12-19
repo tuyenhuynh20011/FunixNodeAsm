@@ -261,3 +261,20 @@ form {
     width: 30rem;
   }
 }
+.pagination {
+  text-align: center;
+  margin-top: 2rem;
+}
+.pagination a {
+  text-decoration: none;
+  color:green;
+  padding:0.5rem;
+  border:1px solid rgb(41, 168, 41);
+  margin: 0 1rem;
+}
+.pagination a:hover,
+.pagination a:active,
+.pagination a.active {
+  background-color: #00695c;
+  color: white;
+}
